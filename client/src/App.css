@@ -1,0 +1,39 @@
+.loading-screen {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  height: 100vh;
+  background-color: #1e263d; /* Light background color */
+}
+.loading-screen img {
+  width: 150px; /* Adjust the size of the loading image */
+  height: auto;
+  margin-bottom: 20px;
+}
+
+.loading-bar-container {
+  width: 80%;
+  height: 10px;
+  background-color: #e0e0e0;
+  border-radius: 5px;
+  overflow: hidden;
+  margin-top: 20px;
+}
+
+.loading-bar {
+  width: 0;
+  height: 100%;
+  background-color: #fded07; /* Blue color for the loading bar */
+  animation: loading 2s forwards ease;
+  border-radius: 5px;
+}
+
+@keyframes loading {
+  from {
+    width: 0;
+  }
+  to {
+    width: 100%;
+  }
+}

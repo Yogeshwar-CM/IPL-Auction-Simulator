@@ -1,0 +1,34 @@
+.navbar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 10px 20px;
+  /* background-color: #19398a; */
+  background: none;
+}
+
+.navbar-logo img {
+  height: 4rem;
+  width: auto;
+}
+
+.left-logo {
+  margin-left: 8px;
+}
+.left-logo img {
+  color: white;
+}
+.center {
+  color: #fffbc0;
+  font-family: "Raleway Dots", sans-serif;
+  font-weight: 100;
+  font-size: 2rem;
+  transform: translate(-5rem);
+}
+
+.right-logo {
+  margin-right: 10px;
+}
+.right-logo img {
+  border-radius: 100rem;
+}

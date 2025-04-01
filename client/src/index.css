@@ -1,0 +1,44 @@
+@import url("https://fonts.googleapis.com/css2?family=Anek+Latin:wght@100..800&display=swap");
+@import url("https://fonts.googleapis.com/css2?family=Anek+Latin:wght@100..800&family=Raleway+Dots&display=swap");
+
+:root {
+  margin: 0;
+}
+body {
+  margin: 0;
+  font-family: "Anek Latin", sans-serif;
+  font-optical-sizing: auto;
+  color: white;
+  background: black;
+}
+
+.home-container {
+  padding: 20px;
+}
+h2 {
+  font-weight: normal;
+}
+.cloud {
+  background-color: #470383;
+  filter: blur(0.5rem);
+  width: 110vw;
+  height: 16vh;
+  z-index: -1;
+  position: absolute;
+  top: 0%;
+  left: -4%;
+}
+.team-info {
+  display: flex;
+  width: 96vw;
+  margin: auto;
+  gap: 1rem;
+  justify-content: space-between;
+  align-items: center;
+}
+.team {
+  border-radius: 0.8rem;
+  width: fit-content;
+  height: 10rem;
+  width: 10rem;
+}
