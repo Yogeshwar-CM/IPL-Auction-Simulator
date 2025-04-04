@@ -1,22 +1,19 @@
 import React, { useState, useEffect } from "react";
 import { io } from "socket.io-client";
+import { DotLottieReact } from "@lottiefiles/dotlottie-react";
 import { motion, AnimatePresence } from "framer-motion";
 import "./Home.css";
 
-// Create a single socket instance that can be shared across components
 const socket = io("http://localhost:3000");
 
 export default function Home() {
   const [teams, setTeams] = useState([]);
   const [selectedTeam, setSelectedTeam] = useState(null);
   const [selectedPlayer, setSelectedPlayer] = useState(null);
+  const [toastMessage, setToastMessage] = useState(null);
 
-  // Fetch initial data and set up WebSocket listeners
   useEffect(() => {
-    // Initial data load
     fetchData();
-
-    // Set up socket listeners for global updates
     socket.on("update:selectedPlayer", (player) => {
       console.log("Home received selected player:", player);
       setSelectedPlayer(player);
@@ -25,8 +22,6 @@ export default function Home() {
     socket.on("update:teams", (updatedTeams) => {
       console.log("Home received updated teams:", updatedTeams);
       setTeams(updatedTeams);
-
-      // If we have a selected team, update it with fresh data from the server
       if (selectedTeam) {
         const freshTeamData = updatedTeams.find(
           (team) => team.id === selectedTeam.id
@@ -37,29 +32,38 @@ export default function Home() {
       }
     });
 
-    // Listen for selected team broadcasts
     socket.on("update:selectedTeam", (team) => {
       console.log("Selected team update from server:", team);
-      // Only update if this is the team we're currently viewing
       if (selectedTeam && team.id === selectedTeam.id) {
         setSelectedTeam(team);
       }
     });
 
-    // Cleanup function to remove listeners when component unmounts
+    // Listen for "player:sold" event
+    socket.on("player:sold", (player) => {
+      // Show toast with player name
+      setToastMessage(`${player.name} has been SOLD!`);
+
+      // Clear the selected player if it matches the sold player
+      if (selectedPlayer && selectedPlayer.id === player.id) {
+        setSelectedPlayer(null);
+      }
+
+      // Clear toast after 3 seconds
+      setTimeout(() => setToastMessage(null), 3000);
+    });
+
     return () => {
       socket.off("update:selectedPlayer");
       socket.off("update:teams");
       socket.off("update:selectedTeam");
+      socket.off("player:sold");
     };
-  }, [selectedTeam]); // Add selectedTeam as dependency to properly update
+  }, [selectedTeam, selectedPlayer]);
 
-  // Effect to handle default team selection
   useEffect(() => {
     if (teams.length > 0 && !selectedTeam) {
-      // Default to the first team if no team is selected
       setSelectedTeam(teams[0]);
-      // Emit to server which team this client is viewing
       socket.emit("select:team", teams[0].id);
     }
   }, [teams, selectedTeam]);
@@ -75,11 +79,9 @@ export default function Home() {
 
   const handleTeamSelect = (team) => {
     setSelectedTeam(team);
-    // Emit to server which team this client is viewing
     socket.emit("select:team", team.id);
   };
 
-  // Helper function to calculate player roles
   const calculateRoleCounts = (players) => {
     const counts = { batters: 0, bowlers: 0, allRounders: 0 };
     players.forEach((player) => {
@@ -89,8 +91,6 @@ export default function Home() {
     });
     return counts;
   };
-
-  // Default placeholder logo
   const defaultLogo =
     "https://www.rcbshop.com/cdn/shop/files/Artboard_1_d8d2bccd-ad1c-4e2e-ba21-144aa9124743.png";
 
@@ -102,25 +102,66 @@ export default function Home() {
       transition={{ duration: 0.8 }}
       className="home-container"
     >
+      {/* Toast Notification */}
+      <AnimatePresence>
+        {toastMessage && (
+          <motion.div
+            className="toast"
+            initial={{ opacity: 0, y: -50 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -50 }}
+            transition={{ duration: 0.3 }}
+          >
+            {toastMessage}
+          </motion.div>
+        )}
+      </AnimatePresence>
+
       <img
         className="header-img"
         src="https://thumbs.dreamstime.com/b/cricket-red-ball-stadium-lighting-natural-green-grass-horizontal-sport-theme-poster-greeting-cards-headers-website-app-290793545.jpg"
         alt=""
       />
-      {/* Currently Selected Player */}
       <AnimatePresence>
         {selectedPlayer && (
           <motion.div
-            className="selected-player"
+            className="selected-player-card"
             initial={{ opacity: 0, y: -20 }}
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: -20 }}
             transition={{ duration: 0.3 }}
           >
-            <h2>Currently Selected Player</h2>
-            <p>Name: {selectedPlayer.name}</p>
-            <p>Role: {selectedPlayer.role}</p>
-            <p>Points: {selectedPlayer.points}</p>
+            <div className="player-card-content">
+              {/* <DotLottieReact
+                src="https://lottie.host/2e551f51-37b6-4f51-aa96-a697e35c2960/gyK8WPSPzQ.lottie"
+                loop
+                autoplay
+                className="animation"
+              /> */}
+              <img
+                src={selectedPlayer.image}
+                alt={selectedPlayer.name}
+                className="player-card-image"
+                onError={(e) => {
+                  e.target.onerror = null;
+                  e.target.src =
+                    "https://upload.wikimedia.org/wikipedia/commons/8/89/Portrait_Placeholder.png"; // Fallback image
+                }}
+              />
+              <div className="player-card-details">
+                <h2>{selectedPlayer.name}</h2>
+                <p>
+                  <strong>Role:</strong> {selectedPlayer.role}
+                </p>
+                <p>
+                  <strong>Points:</strong> {selectedPlayer.points}
+                </p>
+                <p>
+                  <strong>Foreigner:</strong>{" "}
+                  {selectedPlayer.foreigner ? "Yes" : "No"}
+                </p>
+              </div>
+            </div>
           </motion.div>
         )}
       </AnimatePresence>
@@ -147,56 +188,45 @@ export default function Home() {
             <div className="tr">
               <p className="coins">
                 <i className="fa-solid fa-indian-rupee-sign"></i>
-                {selectedTeam.budget.toLocaleString()} L
+                {selectedTeam.budget.toLocaleString()} Cr
               </p>
             </div>
           </div>
-
-          {/* Players Table */}
           <div className="players-table">
-            <h2>Players List</h2>
+            {/* <h2 className="pl">Players List</h2> */}
             <table>
               <thead>
                 <tr>
-                  <th>S. No</th>
-                  <th>Player Image</th>
-                  <th>Player Name</th>
-                  <th>Points</th>
-                  <th>Role</th>
-                  <th>Foreigner</th>
-                  <th>Purchased for (₹ Cr)</th>
+                  <th>POS</th>
+                  <th>PLAYER</th>
+                  <th>POINTS</th>
+                  <th>ROLE</th>
+                  <th>PURCHASED FOR</th>
                 </tr>
               </thead>
               <tbody>
-                {Array.from({ length: 16 }).map((_, index) => {
-                  const player = selectedTeam.players[index];
-                  return (
-                    <tr key={index}>
-                      <td>{index + 1}</td>
-                      <td>
-                        {player ? (
-                          <img
-                            src={player.image}
-                            alt={player.name}
-                            style={{
-                              width: "50px",
-                              height: "50px",
-                              borderRadius: "50%",
-                              objectFit: "cover",
-                            }}
-                          />
-                        ) : (
-                          ""
-                        )}
-                      </td>
-                      <td>{player ? player.name : ""}</td>
-                      <td>{player ? player.points : ""}</td>
-                      <td>{player ? player.role : ""}</td>
-                      <td>{player ? (player.foreigner ? "Yes" : "No") : ""}</td>
-                      <td>{player ? player.purchasedFor : ""}</td>
-                    </tr>
-                  );
-                })}
+                {selectedTeam.players.map((player, index) => (
+                  <tr key={index} className={index % 2 === 0 ? "gray-row" : ""}>
+                    <td>{index + 1}</td>
+                    <td className="inntd">
+                      <img
+                        src={player.image}
+                        className="td-img"
+                        id="player-img"
+                        alt={player.name}
+                      />
+                      <div className="inntdr">
+                        {player.name}{" "}
+                        {player.foreigner ? (
+                          <i className="fa-solid fa-plane td-flight"></i>
+                        ) : null}
+                      </div>
+                    </td>
+                    <td className="td-pts">{player.points}</td>
+                    <td className="td-role">{player.role}</td>
+                    <td className="td-budget">{player.purchasedFor}</td>
+                  </tr>
+                ))}
               </tbody>
             </table>
           </div>
@@ -204,7 +234,6 @@ export default function Home() {
       )}
 
       <h2 className="allt">All Teams</h2>
-      {/* Horizontal Scrollable Cards */}
       <div className="team-carousel">
         {teams.map((team) => (
           <div
@@ -225,7 +254,7 @@ export default function Home() {
             />
             <h3>{team.name}</h3>
             <p className="team-budget-label">
-              ₹ {team.budget.toLocaleString()} L
+              ₹ {team.budget.toLocaleString()} Cr
             </p>
             <p className="team-players-label">Players: {team.players.length}</p>
           </div>

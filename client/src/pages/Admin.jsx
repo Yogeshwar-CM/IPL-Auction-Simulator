@@ -4,10 +4,11 @@ import "./Admin.css";
 import { motion, AnimatePresence } from "framer-motion";
 
 // Create a single socket instance that can be exported and reused
-export const socket = io("http://localhost:3000"); // Connect to WebSocket server
+export const socket = io("http://localhost:3000");
 
 export default function Admin() {
   const [players, setPlayers] = useState([]);
+
   const [teams, setTeams] = useState([]);
   const [selectedPlayer, setSelectedPlayer] = useState(null);
   const [selectedTeam, setSelectedTeam] = useState("");

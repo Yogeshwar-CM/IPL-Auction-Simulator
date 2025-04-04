@@ -40,19 +40,19 @@ db.serialize(() => {
     {
       id: 1,
       name: "Royal Challengers Bangalore",
-      budget: 10000,
+      budget: 100,
       logo: "https://i.pinimg.com/736x/54/96/c3/5496c328d02c848b352190a0eee94dc1.jpg"
     },
     {
       id: 2,
       name: "Chennai Super Kings",
-      budget: 10000,
+      budget: 100,
       logo: "https://i.pinimg.com/736x/4e/e7/ac/4ee7ac144c048d64edcb30d3129a895f.jpg"
     },
     {
       id: 3,
       name: "Mumbai Indians",
-      budget: 10000,
+      budget: 100,
       logo: "https://i.pinimg.com/736x/e8/87/a8/e887a81959a66337b7ccc7835c38470e.jpg"
     },
     {
@@ -64,37 +64,37 @@ db.serialize(() => {
     {
       id: 5,
       name: "Delhi Capitals",
-      budget: 10000,
+      budget: 100,
       logo: "https://i.pinimg.com/736x/5d/a6/04/5da6045278a7a7dba53540a9226ac1c7.jpg"
     },
     {
       id: 6,
       name: "Punjab Kings",
-      budget: 10000,
+      budget: 100,
       logo: "https://mir-s3-cdn-cf.behance.net/projects/404/614abb172278773.Y3JvcCwxNTAwLDExNzMsMCwxNA.png"
     },
     {
       id: 7,
       name: "Rajasthan Royals",
-      budget: 10000,
+      budget: 100,
       logo: "https://i.pinimg.com/736x/44/b9/d2/44b9d2d691b2346d6a7c2a492f105dd1.jpg"
     },
     {
       id: 8,
       name: "Sunrisers Hyderabad",
-      budget: 10000,
+      budget: 100,
       logo: "https://i.pinimg.com/736x/d2/a1/77/d2a177e722cd189ad6fca15fe2644d3e.jpg"
     },
     {
       id: 9,
       name: "Lucknow Super Giants",
-      budget: 10000,
+      budget: 100,
       logo: "https://i.pinimg.com/736x/86/c6/14/86c61402da3732392321dc9f4c6375fb.jpg"
     },
     {
       id: 10,
       name: "Gujarat Titans",
-      budget: 10000,
+      budget: 100,
       logo: "https://i.pinimg.com/736x/ea/df/52/eadf52ed1b962b079801ed8e912c7e10.jpg"
     },
   ];
@@ -205,7 +205,6 @@ io.on("connection", (socket) => {
     });
   });
 
-  // Listen for assigning a player to a team
   socket.on("assign:player", ({ playerId, teamId, purchasedFor }) => {
     db.get("SELECT * FROM players WHERE id = ?", [playerId], (err, player) => {
       if (err || !player) {
@@ -251,6 +250,9 @@ io.on("connection", (socket) => {
 
               // Broadcast updates
               broadcastUpdates();
+
+              // Emit player sold event with the complete player object
+              io.emit("player:sold", player);
             });
           }
         );
@@ -260,7 +262,7 @@ io.on("connection", (socket) => {
 
   socket.on("reset:teams", () => {
     db.serialize(() => {
-      db.run("UPDATE teams SET budget = 10000, players = '[]'", (err) => { // Changed 100 to 10000 to match the initialization
+      db.run("UPDATE teams SET budget = 100, players = '[]'", (err) => {
         if (err) {
           console.error("Error resetting teams:", err);
           socket.emit("error", { message: "Error resetting teams" });
@@ -354,7 +356,7 @@ io.on("connection", (socket) => {
   // Fix for the API reset endpoint to match socket handler
   app.post("/api/teams/reset", (req, res) => {
     db.serialize(() => {
-      db.run("UPDATE teams SET budget = 10000, players = '[]'", (err) => { // Changed 100 to 10000
+      db.run("UPDATE teams SET budget = 100, players = '[]'", (err) => { // Changed 100 to 100
         if (err) {
           return res.status(500).json({ error: err.message });
         }
