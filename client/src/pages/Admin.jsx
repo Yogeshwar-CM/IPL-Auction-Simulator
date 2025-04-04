@@ -4,7 +4,7 @@ import "./Admin.css";
 import { motion, AnimatePresence } from "framer-motion";
 
 // Create a single socket instance that can be exported and reused
-export const socket = io("http://localhost:3000");
+export const socket = io("https://ipl-auction-simulator.onrender.com");
 
 export default function Admin() {
   const [players, setPlayers] = useState([]);
@@ -60,12 +60,12 @@ export default function Admin() {
   }, [selectedPlayer, players]); // Add players as dependency too
 
   const fetchData = () => {
-    fetch("http://localhost:3000/api/players")
+    fetch("https://ipl-auction-simulator.onrender.com/api/players")
       .then((res) => res.json())
       .then((data) => setPlayers(data))
       .catch((err) => console.error("Error fetching players:", err));
 
-    fetch("http://localhost:3000/api/teams")
+    fetch("https://ipl-auction-simulator.onrender.com/api/teams")
       .then((res) => res.json())
       .then((data) => setTeams(data))
       .catch((err) => console.error("Error fetching teams:", err));

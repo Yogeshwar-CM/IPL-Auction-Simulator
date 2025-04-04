@@ -4,7 +4,7 @@ import { DotLottieReact } from "@lottiefiles/dotlottie-react";
 import { motion, AnimatePresence } from "framer-motion";
 import "./Home.css";
 
-const socket = io("http://localhost:3000");
+const socket = io("https://ipl-auction-simulator.onrender.com");
 
 export default function Home() {
   const [teams, setTeams] = useState([]);
@@ -69,7 +69,7 @@ export default function Home() {
   }, [teams, selectedTeam]);
 
   const fetchData = () => {
-    fetch("http://localhost:3000/api/teams")
+    fetch("https://ipl-auction-simulator.onrender.com/api/teams")
       .then((res) => res.json())
       .then((data) => {
         setTeams(data);
