@@ -109,7 +109,7 @@ export default function Admin() {
     socket.emit("assign:player", {
       playerId: selectedPlayer.id,
       teamId: parseInt(selectedTeam), // Ensure teamId is a number
-      purchasedFor: parseInt(purchaseAmount),
+      purchasedFor: purchaseAmount,
     });
     // Don't clear form here - wait for the WebSocket update
   };
